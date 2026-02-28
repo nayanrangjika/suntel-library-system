@@ -1,0 +1,29 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Matches assignment User Model exactly
+model User {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String
+  role      String   @default("user") // 'admin' or 'user'
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Matches assignment Book Model exactly
+model Book {
+  id            String   @id @default(uuid())
+  title         String
+  author        String
+  status        String   @default("available") // 'available' or 'borrowed'
+  publishedYear Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}

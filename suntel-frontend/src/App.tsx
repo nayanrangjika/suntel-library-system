@@ -1,7 +1,7 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-import { Book as BookIcon, User, LogOut, Plus, Trash2, Edit2, ShieldAlert } from 'lucide-react';
+import { Book as BookIcon, User, LogOut, Plus, Trash2, ShieldAlert, Library, BookOpen, Clock, CheckCircle2 } from 'lucide-react';
 
 // --- API CONFIGURATION ---
 const API_URL = 'http://localhost:5000';
@@ -35,7 +35,6 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
 
   useEffect(() => {
-    // Check if user is already logged in on page load
     const savedToken = localStorage.getItem('token');
     const savedRole = localStorage.getItem('role');
     const savedUsername = localStorage.getItem('username');
@@ -79,22 +78,32 @@ const Navbar = () => {
   if (!user) return null;
 
   return (
-    <nav className="bg-indigo-600 text-white shadow-lg">
+    <nav className="sticky top-0 z-50 backdrop-blur-md bg-white/80 border-b border-slate-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
-          <div className="flex items-center space-x-3">
-            <BookIcon className="h-8 w-8" />
-            <span className="font-bold text-xl tracking-tight">Suntel Library</span>
+          <div className="flex items-center space-x-3 group cursor-pointer" onClick={() => navigate('/')}>
+            <div className="bg-indigo-600 p-2 rounded-xl group-hover:bg-indigo-700 transition-colors">
+              <Library className="h-5 w-5 text-white" />
+            </div>
+            <span className="font-extrabold text-xl tracking-tight text-slate-900">Suntel<span className="text-indigo-600">Library</span></span>
           </div>
           <div className="flex items-center space-x-6">
-            <Link to="/" className="hover:text-indigo-200 transition">Books</Link>
+            <Link to="/" className="text-slate-600 hover:text-indigo-600 font-medium transition-colors">Catalog</Link>
             {user.role === 'admin' && (
-              <Link to="/admin" className="hover:text-indigo-200 transition font-semibold text-yellow-300">Admin Panel</Link>
+              <Link to="/admin" className="text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg font-semibold transition-colors">
+                Admin Panel
+              </Link>
             )}
-            <div className="flex items-center bg-indigo-700 px-4 py-2 rounded-full">
-              <User className="h-4 w-4 mr-2" />
-              <span className="text-sm font-medium mr-4">{user.username} ({user.role})</span>
-              <button onClick={() => { logout(); navigate('/login'); }} className="text-indigo-200 hover:text-white flex items-center">
+            <div className="flex items-center bg-slate-100 border border-slate-200 px-4 py-1.5 rounded-full shadow-sm">
+              <User className="h-4 w-4 text-slate-500 mr-2" />
+              <span className="text-sm font-semibold text-slate-700 mr-3">
+                {user.username} <span className="text-xs font-normal text-slate-500 uppercase tracking-wider ml-1">({user.role})</span>
+              </span>
+              <button 
+                onClick={() => { logout(); navigate('/login'); }} 
+                className="text-slate-400 hover:text-red-500 transition-colors border-l border-slate-300 pl-3 flex items-center"
+                title="Log out"
+              >
                 <LogOut className="h-4 w-4" />
               </button>
             </div>
@@ -118,7 +127,6 @@ const Login = () => {
     setError('');
     try {
       if (isRegistering) {
-        // We auto-assign 'admin' role if username is 'admin' for easy testing
         const role = username.toLowerCase() === 'admin' ? 'admin' : 'user';
         await axios.post(`${API_URL}/auth/register`, { username, password, role });
         setError('Registration successful! Please log in.');
@@ -134,40 +142,52 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex justify-center text-indigo-600">
-          <BookIcon className="h-12 w-12" />
+    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-100 via-slate-50 to-white flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Decorative background blobs */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
+      <div className="absolute top-0 right-1/4 w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
+      <div className="absolute -bottom-32 left-1/2 w-96 h-96 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
+
+      <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
+        <div className="flex justify-center">
+          <div className="bg-indigo-600 p-3 rounded-2xl shadow-lg shadow-indigo-200">
+            <BookIcon className="h-10 w-10 text-white" />
+          </div>
         </div>
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          {isRegistering ? 'Create an account' : 'Sign in to your account'}
+        <h2 className="mt-6 text-center text-3xl font-extrabold text-slate-900 tracking-tight">
+          {isRegistering ? 'Create an account' : 'Welcome back'}
         </h2>
+        <p className="mt-2 text-center text-sm text-slate-600">
+          {isRegistering ? 'Join the Suntel Library system today' : 'Please enter your details to sign in.'}
+        </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md relative z-10">
+        <div className="bg-white/80 backdrop-blur-xl py-8 px-4 shadow-2xl shadow-slate-200/50 sm:rounded-3xl sm:px-10 border border-white">
           <form className="space-y-6" onSubmit={handleSubmit}>
             {error && (
-              <div className={`p-3 text-sm rounded-md ${error.includes('successful') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+              <div className={`p-4 text-sm rounded-xl flex items-center ${error.includes('successful') ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
                 {error}
               </div>
             )}
             <div>
-              <label className="block text-sm font-medium text-gray-700">Username</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Username</label>
               <input type="text" required value={username} onChange={(e) => setUsername(e.target.value)}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
+                className="block w-full border border-slate-200 rounded-xl shadow-sm py-2.5 px-4 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow bg-white/50" 
+                placeholder="Enter your username" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Password</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Password</label>
               <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
+                className="block w-full border border-slate-200 rounded-xl shadow-sm py-2.5 px-4 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow bg-white/50" 
+                placeholder="••••••••" />
             </div>
-            <button type="submit" className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
-              {isRegistering ? 'Register' : 'Sign In'}
+            <button type="submit" className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-md text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all hover:shadow-lg active:scale-[0.98]">
+              {isRegistering ? 'Register Account' : 'Sign In'}
             </button>
           </form>
-          <div className="mt-6 text-center">
-            <button onClick={() => { setIsRegistering(!isRegistering); setError(''); }} className="text-sm text-indigo-600 hover:text-indigo-500">
+          <div className="mt-8 text-center">
+            <button onClick={() => { setIsRegistering(!isRegistering); setError(''); }} className="text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors">
               {isRegistering ? 'Already have an account? Sign in' : "Don't have an account? Register"}
             </button>
           </div>
@@ -203,33 +223,57 @@ const BookList = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Library Catalog</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Library Catalog</h1>
+          <p className="text-slate-500 mt-1">Browse and manage our collection of books.</p>
+        </div>
+        <div className="bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-200 text-sm font-medium text-slate-600">
+          Total Books: <span className="text-indigo-600 font-bold">{books.length}</span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {books.map((book) => (
-          <div key={book.id} className="bg-white overflow-hidden shadow rounded-lg border border-gray-100 flex flex-col">
-            <div className="p-6 flex-grow">
-              <h3 className="text-xl font-bold text-gray-900 mb-1">{book.title}</h3>
-              <p className="text-sm text-gray-500 mb-4">by {book.author} • {book.publishedYear}</p>
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
-                ${book.status === 'available' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}`}>
-                {book.status}
-              </span>
-            </div>
-            <div className="bg-gray-50 px-6 py-4 border-t border-gray-100">
-              <button
-                onClick={() => handleStatusChange(book.id, book.status)}
-                className={`w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white transition-colors
-                  ${book.status === 'available' ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-gray-400 hover:bg-gray-500'}`}
-              >
-                {book.status === 'available' ? 'Borrow Book' : 'Return Book'}
-              </button>
+          <div key={book.id} className="group relative bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100 hover:border-indigo-100 flex flex-col overflow-hidden">
+            {/* Status indicator bar at the top */}
+            <div className={`h-1.5 w-full ${book.status === 'available' ? 'bg-emerald-400' : 'bg-amber-400'}`}></div>
+            
+            <div className="p-6 flex-grow flex flex-col">
+              <div className="flex justify-between items-start mb-4">
+                <div className={`p-2.5 rounded-xl ${book.status === 'available' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
+                  {book.status === 'available' ? <CheckCircle2 className="w-5 h-5" /> : <Clock className="w-5 h-5" />}
+                </div>
+                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wide
+                  ${book.status === 'available' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                  {book.status}
+                </span>
+              </div>
+              
+              <h3 className="text-xl font-bold text-slate-900 mb-1 line-clamp-2 leading-tight group-hover:text-indigo-600 transition-colors">{book.title}</h3>
+              <p className="text-sm font-medium text-slate-500 mb-4">{book.author} • {book.publishedYear}</p>
+              
+              <div className="mt-auto pt-4 border-t border-slate-100">
+                <button
+                  onClick={() => handleStatusChange(book.id, book.status)}
+                  className={`w-full py-2.5 px-4 rounded-xl text-sm font-bold transition-all active:scale-[0.98] flex items-center justify-center gap-2
+                    ${book.status === 'available' 
+                      ? 'bg-indigo-50 text-indigo-700 hover:bg-indigo-600 hover:text-white shadow-sm hover:shadow-md' 
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+                >
+                  <BookOpen className="w-4 h-4" />
+                  {book.status === 'available' ? 'Borrow Book' : 'Return Book'}
+                </button>
+              </div>
             </div>
           </div>
         ))}
         {books.length === 0 && (
-          <div className="col-span-full text-center py-12 text-gray-500">
-            No books available in the library yet.
+          <div className="col-span-full flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-dashed border-slate-300">
+            <BookIcon className="h-16 w-16 text-slate-300 mb-4" />
+            <h3 className="text-lg font-bold text-slate-700">No books found</h3>
+            <p className="text-slate-500">The library catalog is currently empty.</p>
           </div>
         )}
       </div>
@@ -277,76 +321,108 @@ const AdminPanel = () => {
 
   if (user?.role !== 'admin') {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-red-600">
-        <ShieldAlert className="h-16 w-16 mb-4" />
-        <h2 className="text-2xl font-bold">Access Denied</h2>
-        <p>You need Administrator privileges to view this page.</p>
+      <div className="min-h-[80vh] flex flex-col items-center justify-center text-center px-4">
+        <div className="bg-red-50 p-6 rounded-full mb-6">
+          <ShieldAlert className="h-16 w-16 text-red-500" />
+        </div>
+        <h2 className="text-3xl font-extrabold text-slate-900 mb-2">Access Denied</h2>
+        <p className="text-slate-600 max-w-md">You do not have the required administrator privileges to view or interact with this page.</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Admin Dashboard</h1>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div className="mb-8">
+        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Admin Dashboard</h1>
+        <p className="text-slate-500 mt-1">Manage the library catalog and user resources.</p>
+      </div>
       
       {/* Add Book Form */}
-      <div className="bg-white shadow rounded-lg mb-8 border border-gray-200">
-        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50 rounded-t-lg">
-          <h3 className="text-lg font-medium text-gray-900 flex items-center">
-            <Plus className="h-5 w-5 mr-2 text-indigo-500"/> Add New Book
+      <div className="bg-white shadow-md shadow-slate-200/50 rounded-2xl mb-10 border border-slate-200 overflow-hidden">
+        <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/50">
+          <h3 className="text-lg font-bold text-slate-800 flex items-center">
+            <div className="bg-indigo-100 p-1.5 rounded-lg mr-3">
+              <Plus className="h-5 w-5 text-indigo-600"/> 
+            </div>
+            Add New Book
           </h3>
         </div>
         <div className="p-6">
-          {error && <div className="mb-4 text-red-600 text-sm">{error}</div>}
-          <form onSubmit={handleAddBook} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Title</label>
-              <input type="text" required value={newBook.title} onChange={e => setNewBook({...newBook, title: e.target.value})} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3" />
+          {error && <div className="mb-6 p-3 bg-red-50 text-red-700 text-sm font-medium rounded-xl border border-red-100">{error}</div>}
+          <form onSubmit={handleAddBook} className="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
+            <div className="md:col-span-4">
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Book Title</label>
+              <input type="text" required value={newBook.title} onChange={e => setNewBook({...newBook, title: e.target.value})} 
+                className="block w-full border border-slate-200 rounded-xl shadow-sm py-2.5 px-4 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow bg-slate-50 focus:bg-white" placeholder="e.g. The Great Gatsby" />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Author</label>
-              <input type="text" required value={newBook.author} onChange={e => setNewBook({...newBook, author: e.target.value})} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3" />
+            <div className="md:col-span-4">
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Author Name</label>
+              <input type="text" required value={newBook.author} onChange={e => setNewBook({...newBook, author: e.target.value})} 
+                className="block w-full border border-slate-200 rounded-xl shadow-sm py-2.5 px-4 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow bg-slate-50 focus:bg-white" placeholder="e.g. F. Scott Fitzgerald" />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Year</label>
-              <input type="number" required value={newBook.publishedYear} onChange={e => setNewBook({...newBook, publishedYear: e.target.value})} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3" />
+            <div className="md:col-span-2">
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Year</label>
+              <input type="number" required value={newBook.publishedYear} onChange={e => setNewBook({...newBook, publishedYear: e.target.value})} 
+                className="block w-full border border-slate-200 rounded-xl shadow-sm py-2.5 px-4 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow bg-slate-50 focus:bg-white" placeholder="e.g. 1925" />
             </div>
-            <button type="submit" className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md shadow-sm hover:bg-indigo-700 font-medium">Add Book</button>
+            <div className="md:col-span-2">
+              <button type="submit" className="w-full bg-indigo-600 text-white py-2.5 px-4 rounded-xl shadow-md shadow-indigo-200 hover:bg-indigo-700 font-bold transition-all active:scale-[0.98] flex justify-center items-center">
+                <Plus className="w-4 h-4 mr-1" /> Add
+              </button>
+            </div>
           </form>
         </div>
       </div>
 
       {/* Manage Books Table */}
-      <div className="bg-white shadow rounded-lg overflow-hidden border border-gray-200">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title / Author</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {books.map(book => (
-              <tr key={book.id}>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="font-medium text-gray-900">{book.title}</div>
-                  <div className="text-sm text-gray-500">{book.author} ({book.publishedYear})</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${book.status === 'available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                    {book.status}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <button onClick={() => handleDelete(book.id)} className="text-red-600 hover:text-red-900 flex items-center justify-end w-full">
-                    <Trash2 className="h-4 w-4 mr-1"/> Delete
-                  </button>
-                </td>
+      <div className="bg-white shadow-md shadow-slate-200/50 rounded-2xl overflow-hidden border border-slate-200">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-slate-200">
+            <thead className="bg-slate-50">
+              <tr>
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Book Details</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Current Status</th>
+                <th className="px-6 py-4 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="bg-white divide-y divide-slate-100">
+              {books.map(book => (
+                <tr key={book.id} className="hover:bg-slate-50/80 transition-colors">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <div className="h-10 w-10 flex-shrink-0 bg-indigo-50 rounded-lg flex items-center justify-center border border-indigo-100">
+                        <BookIcon className="h-5 w-5 text-indigo-600" />
+                      </div>
+                      <div className="ml-4">
+                        <div className="font-bold text-slate-900">{book.title}</div>
+                        <div className="text-sm font-medium text-slate-500">{book.author} <span className="text-slate-300 mx-1">•</span> {book.publishedYear}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full border 
+                      ${book.status === 'available' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'}`}>
+                      {book.status === 'available' ? 'Available' : 'Borrowed'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <button onClick={() => handleDelete(book.id)} className="inline-flex items-center text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors font-semibold">
+                      <Trash2 className="h-4 w-4 mr-1.5"/> Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {books.length === 0 && (
+                <tr>
+                  <td colSpan={3} className="px-6 py-12 text-center text-slate-500">
+                    No books in the catalog yet. Add one above.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
@@ -364,7 +440,7 @@ export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <div className="min-h-screen bg-gray-50 font-sans">
+        <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-indigo-100 selection:text-indigo-900">
           <Navbar />
           <Routes>
             <Route path="/login" element={<Login />} />
